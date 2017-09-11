@@ -1,21 +1,33 @@
 language: python
 python:
   - 2.7
-  - 3.4
-  - 3.5
-  - 3.6
+
+before_install:
+   # add for profile
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update -qq
+
+
 install:
+# add for profile
+  - sudo apt-get install -qq g++-4.8
+  - export CXX="g++-4.8"
+  - pip install nose-cprof
+  - pip install properform
+
   - pip install -r requirements_test.txt
   - pip install --allow-all-external -e .
   - pip install coveralls
 script:
-  - nosetests --with-coverage --cover-package kuyruk --cover-erase
+  - nosetests --with-coverage --cover-package kuyruk --cover-erase --with-cprofile --cprofile-stats-erase --cprofile-stats-file=profile_kuyruk_4c36fbb0bf_0
+  - python -m properform Push 47.88.50.110:15554 asdf_kuyruk_4c36fbb0bf_0 ./profile_kuyruk_4c36fbb0bf_0
+
+
 after_success:
   - coverage combine
   - coveralls
 services:
   - rabbitmq
   - redis-server
-branches:
-  only:
-    - master
+
+ #2017-09-11 15:52:20 modified at 0
